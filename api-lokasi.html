@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Alamat dengan Geocoding API dan Autocomplete</title>
+    <script>
+        let autocomplete;
+
+        // Inisialisasi Autocomplete setelah halaman selesai dimuat
+        function initAutocomplete() {
+            let input = document.getElementById('address');
+            autocomplete = new google.maps.places.Autocomplete(input);
+        }
+
+        async function generateAddress() {
+            let addressInput = document.getElementById("address").value;
+            let apiKey = 'AIzaSyCN0_WorGxXDRt_eL92mzdirt4ASWzpueo'; // Ganti dengan API key Anda
+            let geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addressInput)}&key=${apiKey}`;
+
+            try {
+                let response = await fetch(geocodingUrl);
+                let data = await response.json();
+                
+                if (data.status === "OK") {
+                    let formattedAddress = data.results[0].formatted_address;
+                    let location = data.results[0].geometry.location;
+
+                    let result = {
+                        "formatted address": formattedAddress,
+                        "geometry": {
+                            "location": {
+                                "lat": location.lat,
+                                "lng": location.lng
+                            }
+                        }
+                    };
+
+                    document.getElementById("result").textContent = JSON.stringify(result, null, 2);
+                } else {
+                    document.getElementById("result").textContent = "Alamat tidak ditemukan.";
+                }
+            } catch (error) {
+                document.getElementById("result").textContent = "Terjadi kesalahan: " + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Masukkan Alamat</h2>
+    <input type="text" id="address" placeholder="Masukkan alamat">
+    <button onclick="generateAddress()">Hasilkan JSON</button>
+
+    <h3>Hasil:</h3>
+    <pre id="result"></pre>
+
+    <!-- Load Google Maps JavaScript API untuk Places API dan Geocoding -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCN0_WorGxXDRt_eL92mzdirt4ASWzpueo&libraries=places&callback=initAutocomplete"
+    async defer></script>
+</body>
+</html>
